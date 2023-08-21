@@ -1,0 +1,9 @@
+mern.fundraisercodechallenge.com:443 {
+    tls zmorin15@gmail.com
+    root * /srv
+    route {
+        reverse_proxy /api* api-server: 5050
+        try_files {path} {path}/ /index.html
+        file_server
+    }
+}

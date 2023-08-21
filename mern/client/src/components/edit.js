@@ -1,142 +1,252 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
+import React, {useState, useEffect} from "react";
+import {useParams, useNavigate} from "react-router";
+import api from '../api';
 
 export default function Edit() {
- const [form, setForm] = useState({
-   name: "",
-   position: "",
-   level: "",
-   records: [],
- });
- const params = useParams();
- const navigate = useNavigate();
+  const [form, setForm] = useState({
+    fundraiser_name: "",
+    reviewer_name: "",
+    reviewer_email: "",
+    description:"",
+    reviewer_date: new Date().toUTCString(),
+    overall_rating: "5",
+  });
 
- useEffect(() => {
-   async function fetchData() {
-     const id = params.id.toString();
-     const response = await fetch(`http://localhost:5050/record/${params.id.toString()}`);
+  const [fundraiser, setFundraiser] = useState({});
 
-     if (!response.ok) {
-       const message = `An error has occurred: ${response.statusText}`;
-       window.alert(message);
-       return;
-     }
+  const params = useParams();
+  const navigate = useNavigate();
 
-     const record = await response.json();
-     if (!record) {
-       window.alert(`Record with id ${id} not found`);
-       navigate("/");
-       return;
-     }
+  useEffect(() => {
+    async function fetchData() {
+      const id = params.id.toString();
+      const response = await api.getFundraiserById(id);
 
-     setForm(record);
-   }
+      if (response.status !== 200) {
+        const message = `An error has occurred: ${response.statusText}`;
+        window.alert(message);
+        return;
+      }
 
-   fetchData();
+      const record = response.data;
 
-   return;
- }, [params.id, navigate]);
 
- // These methods will update the state properties.
- function updateForm(value) {
-   return setForm((prev) => {
-     return { ...prev, ...value };
-   });
- }
+      if (!record) {
+        window.alert(`Record with id ${id} not found`);
+        navigate("/");
+        return;
+      }
 
- async function onSubmit(e) {
-   e.preventDefault();
-   const editedPerson = {
-     name: form.name,
-     position: form.position,
-     level: form.level,
-   };
+      setForm({
+        fundraiser_name: record.fundraiser_name,
+      });
 
-   // This will send a post request to update the data in the database.
-   await fetch(`http://localhost:5050/record/${params.id}`, {
-     method: "PATCH",
-     body: JSON.stringify(editedPerson),
-     headers: {
-       'Content-Type': 'application/json'
-     },
-   });
+      setFundraiser(record);
+    }
 
-   navigate("/");
- }
+    fetchData();
+  }, [params.id, navigate]);
 
- // This following section will display the form that takes input from the user to update the data.
- return (
-   <div>
-     <h3>Update Record</h3>
-     <form onSubmit={onSubmit}>
-       <div className="form-group">
-         <label htmlFor="name">Name: </label>
-         <input
-           type="text"
-           className="form-control"
-           id="name"
-           value={form.name}
-           onChange={(e) => updateForm({ name: e.target.value })}
-         />
-       </div>
-       <div className="form-group">
-         <label htmlFor="position">Position: </label>
-         <input
-           type="text"
-           className="form-control"
-           id="position"
-           value={form.position}
-           onChange={(e) => updateForm({ position: e.target.value })}
-         />
-       </div>
-       <div className="form-group">
-         <div className="form-check form-check-inline">
-           <input
-             className="form-check-input"
-             type="radio"
-             name="positionOptions"
-             id="positionIntern"
-             value="Intern"
-             checked={form.level === "Intern"}
-             onChange={(e) => updateForm({ level: e.target.value })}
-           />
-           <label htmlFor="positionIntern" className="form-check-label">Intern</label>
-         </div>
-         <div className="form-check form-check-inline">
-           <input
-             className="form-check-input"
-             type="radio"
-             name="positionOptions"
-             id="positionJunior"
-             value="Junior"
-             checked={form.level === "Junior"}
-             onChange={(e) => updateForm({ level: e.target.value })}
-           />
-           <label htmlFor="positionJunior" className="form-check-label">Junior</label>
-         </div>
-         <div className="form-check form-check-inline">
-           <input
-             className="form-check-input"
-             type="radio"
-             name="positionOptions"
-             id="positionSenior"
-             value="Senior"
-             checked={form.level === "Senior"}
-             onChange={(e) => updateForm({ level: e.target.value })}
-           />
-           <label htmlFor="positionSenior" className="form-check-label">Senior</label>
-       </div>
-       </div>
-       <br />
+  function updateForm(value) {
+    return setForm((prev) => {
+      return {
+        ...prev,
+        ...value
+      };
+    });
+  }
 
-       <div className="form-group">
-         <input
-           type="submit"
-           value="Update Record"
-           className="btn btn-primary"
-         />
-       </div>
-     </form>
-   </div>
- );
+  async function onSubmit(e) {
+    e.preventDefault();
+
+    fundraiser.reviews = [
+      ...fundraiser.reviews,
+      {
+        reviewer_name: form.reviewer_name,
+        reviewer_email: form.reviewer_email,
+        rating: form.overall_rating,
+        description: form.description,
+        review_date: new Date().toUTCString()
+      }
+    ]
+
+
+    // Make API call to update the fundraiser
+    await api.editFundraiser(params.id.toString(), fundraiser).then(res => {
+      console.log(res);
+
+      // Future Zach: What happens if the res has a different error?
+      if (res && res.error === "Duplicate Email") {
+        const message = `Sorry! Only one review per user.`;
+        window.alert(message);
+        return;
+      }
+
+      navigate("/");
+    })
+    // await fetch(`http://localhost:5050/record/${params.id.toString()}`, {
+    //   method: "PATCH",
+    //   body: JSON.stringify(fundraiser),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    // }).then(res => {
+    //   if (!res.ok) {
+    //     return res.json();
+    //   }
+    // }).then(res => {
+    //   // Future Zach: What happens if the res has a different error?
+    //   if (res && res.error === "Duplicate Email") {
+    //     const message = `Sorry! Only one review per user.`;
+    //     window.alert(message);
+    //     return;
+    //   }
+    //
+    //   navigate("/");
+    // })
+  }
+
+  return (
+      <div className="ps-3 pe-3">
+        <h3>Leave a Review</h3>
+        <form onSubmit={onSubmit} className="needs-validation">
+          <div className="form-group">
+            <label htmlFor="name">Fundraiser Name: </label>
+            <input
+                type="text"
+                className="form-control"
+                readOnly={true}
+                id="fundraiser_name"
+                value={form.fundraiser_name}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="reviewer_name">Enter Name: </label>
+            <input
+                type="text"
+                className="form-control"
+                id="reviewer_name"
+                value={form.reviewer_name ?? ""}
+                required
+                onChange={(e) => updateForm({reviewer_name: e.target.value})}
+            />
+            <div className="invalid-feedback">
+              Please enter a name.
+            </div>
+          </div>
+
+
+          <div className="form-group">
+            <label htmlFor="reviewer_email">Enter Your Email: </label>
+            <input
+                type="email"
+                className="form-control"
+                id="reviewer_email"
+                value={form.reviewer_email ?? ""}
+                required
+                onChange={(e) => updateForm({reviewer_email: e.target.value})}
+            />
+            <div className="invalid-feedback">
+              Please enter a name.
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">Review: </label>
+            <textarea
+                type="text"
+                className="form-control"
+                id="description"
+                value={form.description ?? ""}
+                onChange={(e) => updateForm({description: e.target.value})}
+            ></textarea>
+          </div>
+
+          {/* Rating Radio Buttons */}
+          <div className="form-group">
+            <div>Rating</div>
+            <div className="form-check form-check-inline">
+              <label htmlFor="ratingOne" className="form-check-label">1 Star</label>
+              <input
+                  className="form-check-input"
+                  type="radio"
+                  name="ratingOptions"
+                  id="ratingOne"
+                  value="1"
+                  required
+                  checked={form.overall_rating === "1" }
+                  onChange={(e) => updateForm({overall_rating: e.target.value})}
+              />
+            </div>
+
+            <div className="form-check form-check-inline">
+              <label htmlFor="ratingTwo" className="form-check-label">2 Stars</label>
+              <input
+                  className="form-check-input"
+                  type="radio"
+                  name="ratingOptions"
+                  id="ratingTwo"
+                  value="2"
+                  required
+                  checked={form.overall_rating === "2" }
+                  onChange={(e) => updateForm({overall_rating: e.target.value})}
+              />
+
+            </div>
+            <div className="form-check form-check-inline">
+              <label htmlFor="ratingThree" className="form-check-label">3 Stars</label>
+              <input
+                  className="form-check-input"
+                  type="radio"
+                  name="ratingOptions"
+                  id="ratingThree"
+                  value="3"
+                  required
+                  checked={form.overall_rating === "3" }
+                  onChange={(e) => updateForm({overall_rating: e.target.value})}
+              />
+            </div>
+
+            <div className="form-check form-check-inline">
+              <label htmlFor="ratingFour" className="form-check-label">4 Stars</label>
+              <input
+                  className="form-check-input"
+                  type="radio"
+                  name="ratingOptions"
+                  id="ratingFour"
+                  value="4"
+                  required
+                  checked={form.overall_rating === "4" }
+                  onChange={(e) => updateForm({overall_rating: e.target.value})}
+              />
+            </div>
+
+            <div className="form-check form-check-inline">
+              <label htmlFor="ratingTwo" className="form-check-label">5 Stars</label>
+              <input
+                  className="form-check-input"
+                  type="radio"
+                  name="ratingOptions"
+                  id="rating"
+                  value="5"
+                  required
+                  checked={form.overall_rating === "5" }
+                  onChange={(e) => updateForm({overall_rating: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <br/>
+
+          <div className="form-group">
+            <input
+                type="submit"
+                value="Add Review"
+                className="btn btn-primary"
+            />
+          </div>
+        </form>
+      </div>
+  );
 }
