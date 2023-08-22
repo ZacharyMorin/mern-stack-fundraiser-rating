@@ -13,5 +13,6 @@ app.use("/record", records);
 
 // start the Express server
 app.listen(PORT, () => {
-  console.log(`Server is running on port: ${PORT}`);
+  console.log(`mongo: ${process.env.ATLAS_URI}`)
+  console.log(`James Server is running on port: ${PORT}`);
 });

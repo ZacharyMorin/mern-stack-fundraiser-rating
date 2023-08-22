@@ -10,7 +10,7 @@ services:
       - mern-app
     volumes:
       - ./client/:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./client/node_modules:/usr/src/app/node_modules
   api-server:
     image: api-server
     build: ./server/
@@ -20,7 +20,7 @@ services:
       - mern-app
     volumes:
       - ./server/:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./server/node_modules:/usr/src/app/node_modules
     depends_on:
       - mongo
   mongo:

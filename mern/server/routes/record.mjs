@@ -11,7 +11,6 @@ router.get("/", async (req, res) => {
   let results = await collection.find({}).toArray();
 
   results = results.sort((a, b) => b.overall_rating - a.overall_rating);
-
   res.send(results).status(200);
 });
 
