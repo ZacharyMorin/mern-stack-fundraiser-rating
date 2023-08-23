@@ -66,14 +66,12 @@ export default function Edit() {
         reviewer_email: form.reviewer_email,
         rating: form.overall_rating,
         description: form.description,
-        review_date: new Date().toUTCString()
+        reviewer_date: new Date().toUTCString()
       }
     ]
 
-
     // Make API call to update the fundraiser
-    await api.editFundraiser(params.id.toString(), fundraiser).then(res => {
-      console.log(res);
+    await api.editFundraiser(params.id, fundraiser).then(res => {
 
       // Future Zach: What happens if the res has a different error?
       if (res && res.error === "Duplicate Email") {
@@ -84,26 +82,6 @@ export default function Edit() {
 
       navigate("/");
     })
-    // await fetch(`http://localhost:5050/record/${params.id.toString()}`, {
-    //   method: "PATCH",
-    //   body: JSON.stringify(fundraiser),
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    // }).then(res => {
-    //   if (!res.ok) {
-    //     return res.json();
-    //   }
-    // }).then(res => {
-    //   // Future Zach: What happens if the res has a different error?
-    //   if (res && res.error === "Duplicate Email") {
-    //     const message = `Sorry! Only one review per user.`;
-    //     window.alert(message);
-    //     return;
-    //   }
-    //
-    //   navigate("/");
-    // })
   }
 
   return (

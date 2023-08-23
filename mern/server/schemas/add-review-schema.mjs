@@ -13,7 +13,7 @@ const addReviewSchema = Joi.object({
                 reviewer_email: Joi.string().email().required(),
                 description: Joi.string(),
                 rating: Joi.string().required(),
-                review_date: Joi.string()
+                reviewer_date: Joi.string()
             }
         )
     )
