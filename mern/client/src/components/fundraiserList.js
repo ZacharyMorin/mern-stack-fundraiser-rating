@@ -15,24 +15,23 @@ const Record = (props) => (
 export default function FundraiserList() {
     const [records, setRecords] = useState([]);
 
-    // This method fetches the records from the database.
     useEffect(() => {
-        async function getRecords() {
-            const response = await api.getAllFundraisers();
+        getRecords();
+    }, [])
 
+    const getRecords = () => {
+        api.getAllFundraisers().then(response => {
             if (response.status !== 200) {
-                console.log(response)
                 const message = `An error occurred: ${response.statusText}`;
                 window.alert(message);
                 return;
             }
 
-            const records = response.data;
-            setRecords(records);
-        }
-
-        getRecords(); // Future Zach: this seems to be getting called twice on page load?
-    }, [records.length]);
+            setRecords(response.data);
+        }).catch(error => {
+            console.log(error);
+        })
+    }
 
 
     // Map out the records on the table

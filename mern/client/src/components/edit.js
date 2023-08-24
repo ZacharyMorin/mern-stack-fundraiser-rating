@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {useParams, useNavigate} from "react-router";
+import {useParams, useNavigate} from "react-router-dom";
 import api from '../api';
 
 export default function Edit() {
@@ -81,6 +81,14 @@ export default function Edit() {
       }
 
       navigate("/");
+    }).catch(error => {
+      // FUTURE ZACH: Magic string problem?
+      if (error.response.data.error === "Duplicate Email") {
+        const message = `Sorry! Only one review per user.`;
+        window.alert(message);
+        return;
+      }
+      window.alert(message);
     })
   }
 

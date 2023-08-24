@@ -56,7 +56,6 @@ router.patch("/:id", async (req, res) => {
   const { error, value } = addReviewSchema.validate(req.body);
 
   if (error) {
-    console.log(error);
     return res.send("Invalid Request");
   }
 
@@ -65,8 +64,6 @@ router.patch("/:id", async (req, res) => {
   const [newReview] = req.body.reviews.slice(-1);
 
   let collection = await db.collection("records");
-
-  console.log(collection);
 
   // Check for duplicate review postings
   let duplicateEmail = false;
@@ -84,9 +81,6 @@ router.patch("/:id", async (req, res) => {
         reviews: req.body.reviews
       }
     };
-
-    console.log('----updates----');
-    console.log(updates);
 
     let result = await collection.updateOne(query, updates);
 

@@ -8,7 +8,7 @@ export default function Navbar() {
         <div>
             <nav className="navbar navbar-expand-lg navbar-light bg-light justify-content-between ps-3 pe-3">
                 <NavLink className="navbar-brand" to="/">
-                    Fundraiser Review App!!
+                    Fundraiser Review App
                 </NavLink>
 
                 <div className="" id="navbarSupportedContent">
