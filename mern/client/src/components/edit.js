@@ -88,7 +88,8 @@ export default function Edit() {
         window.alert(message);
         return;
       }
-      window.alert(message);
+
+      console.log(error);
     })
   }
 
